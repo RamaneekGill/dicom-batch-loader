@@ -6,10 +6,6 @@ from dicom.errors import InvalidDicomError
 import numpy as np
 from PIL import Image, ImageDraw
 
-# TODO:
-# lists to numpy
-# get rid of try excepts hasattr(a, 'property'):
-
 def parse_contour_file(filename):
     """Parse the given contour filename
 
@@ -29,7 +25,6 @@ def parse_contour_file(filename):
 
     return coords_lst
 
-
 def parse_dicom_file(filename):
     """Parse the given DICOM filename
 
@@ -41,24 +36,28 @@ def parse_dicom_file(filename):
         dcm = dicom.read_file(filename)
         dcm_image = dcm.pixel_array
 
-        try:
+        if hasattr(dcm, 'RescaleIntercept'):
             intercept = dcm.RescaleIntercept
-        except AttributeError:
+        else:
             intercept = 0.0
-        try:
+
+        if hasattr(dcm, 'RescaleSlope'):
             slope = dcm.RescaleSlope
-        except AttributeError:
+        else:
             slope = 0.0
 
-        if intercept != 0.0 and slope != 0.0:
-            dcm_image = dcm_image*slope + intercept
-        dcm_dict = {'pixel_data' : dcm_image}
-        return dcm_dict
+        if not_origin_and_not_horizontal(intercept, slope):
+            dcm_image = dcm_image * slope + intercept
+
+        return {'pixel_data' : dcm_image}
+
     except InvalidDicomError:
         return None
 
+def not_origin_and_not_horizontal(intercept, slope):
+    """Returns True iff the intercept and slope are both non zero"""
+    return intercept != 0.0 and slope != 0.0
 
-# Remove word poly, no where do we assume it is a polygon
 def poly_to_mask(polygon, width, height):
     """Convert polygon to mask
 
@@ -70,7 +69,13 @@ def poly_to_mask(polygon, width, height):
     """
 
     # http://stackoverflow.com/a/3732128/1410871
+    # ^ A link to a stackoverflow is bad practise! Instead the code/documentation
+    # should give a clear depiction of why it is written in such a way
+
+    # Create a new 8-bit pixel black and white canvas
     img = Image.new(mode='L', size=(width, height), color=0)
+    # Draw a polygon with the outline being False and filling being True
     ImageDraw.Draw(img).polygon(xy=polygon, outline=0, fill=1)
+    # Convert the image to a boolean numpy array, most likely for easy Keras use
     mask = np.array(img).astype(bool)
     return mask
