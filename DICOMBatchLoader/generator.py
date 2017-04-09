@@ -42,8 +42,3 @@ class GeneratorFactory(object):
 
         # Combine generators into one which yields dicom and masks
         return zip(dicom_generator, mask_generator)
-
-# >>> import wrangler
-# >>> data_dir = '/Users/ramaneekgill/Development/Practise/arterys/final_data/'
-# >>> x, y = wrangler.wrangle(data_dir, data_dir + 'link.csv')
-# >>> import generator

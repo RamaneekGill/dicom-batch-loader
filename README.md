@@ -21,7 +21,7 @@ The following Python packages are used and their motivation behind them.
 - keras
  - For reusing the ImageDataGenerator
 
-TODO `pip freeze > requirements.txr` for exact reproduction of the Python environment.
+TODO `pip freeze > requirements.txt` for exact reproduction of the Python environment.
 
 ### Compute Environment
 
@@ -43,6 +43,8 @@ Ensure the project works by doing in the Python shell `import DataGenerator`
 ## Running the tests
 
 This is how you run the tests: `TODO`
+
+Ran out of time: `python tests/test_parsing.py`
 
 # Design Considerations
 This is designed to be a batch loader for dicom image data.
@@ -74,15 +76,26 @@ To deploy run `cf push` in the root directory of the project.
 
 # How to use
 There are two ways to use the batch generator, through direct usage or through
-an API.
+an API when deployed. Here we discuss direct usage.
 
 For direct usage:
-- pip install the project
-- `include DataGenerator`
-- `DataGenerator.generate(TODO)`
+```
+import wrangler
+import generator
 
-For API:
-- TODO
+data_dir = '.../final_data/'
+dicoms, masks = wrangler.wrangle(data_dir, data_dir + 'link.csv')
+
+factory = generator.GeneratorFactory()
+dicom_mask_batch_generator = factory.create(dicoms, masks)
+your_keras_model.fit_generator(dicom_mask_batch_generator, steps_per_epoch=10, epochs=3)
+```
+
+Refer to the documentation in `DICOMBatchLoader.generator` and https://keras.io/preprocessing/image/
+for more options!
+
+If you've installed the package through `PIP` prepend your imports with a `DicomBatchLoader`. Note
+this wasn't tested ;).
 
 # Questions!
 
@@ -107,12 +120,47 @@ Notable changes:
 
 ### Did you change anything from the pipelines built in Parts 1 to better streamline the pipeline built in Part 2? If so, what? If not, is there anything that you can imagine changing in the future?
 
-TODO
+Nope. I read in advance of what to prepare for, also I have worked with creating generators before with DICOM data a couple months ago so knew
+what challenges to expect. One tiny thing I did have to change was figure out how to get the greyscale images working with the Keras generator.
 
 ### How do you/did you verify that the pipeline was working correctly?
 
-TODO
+View the tests for Keras to make sure there's sufficient code coverage here: https://github.com/fchollet/keras/blob/7f58b6fbe702c1936e88a878002ee6e9c469bc77/tests/keras/preprocessing/image_test.py
+
+Also test out my generator with some sample code:
+```
+for e in range(epochs):
+    print 'Epoch', e
+    batches = 0
+    for X_batch, Y_batch in my_generator.flow(X, y, batch_size=4):
+        batches += 1
+        if batches >= len(X_train) / 4:
+            # break loop manually
+            break
+```
 
 ### Given the pipeline you have built, can you see any deficiencies that you would change if you had more time? If not, can you think of any improvements/enhancements to the pipeline that you could build in?
 
-TODO 
+Right now for the generator to fit it needs to bring all images in to memory. This happens when you call the `GeneratorFactory.create()` method.
+
+If I had more time I would also refactor my imports of `os` and the like to only import relevant methods. I would also actually write out
+some tests instead of scaffolding out some, it was difficult to stay true to the 3 hour timeline but I feel like I accomplished a lot. 
+
+I can see defincies with this pipeline when trying to use a huge dataset. After having the masks generated we should be saving them in a format
+such as hdf5 for efficient storage. Whenever we would like to retrain this pipeline will have to regenerate the masks. Very expensive with a large
+dataset!
+
+This pipeline needs more tests!!!
+
+Also this pipeline should ideally be deployed as a microservice and not embedded. You can do some pretty cool things with apache spark and
+simultaneously training a variety of different models.
+
+
+
+# NOTES:
+
+Error when creating generator:
+`ValueError: Input to .fit() should have rank 4. Got array with shape: (96, 256, 256)`
+
+This is because the channels axis should have value 1 as per Keras documentation. Going to stay true to the time
+and submit regardless.
