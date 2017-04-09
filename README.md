@@ -1,4 +1,4 @@
-# Project Title
+# DICOM Batch Generator
 
 Batch generator for DICOM and inner contours.
 
@@ -74,3 +74,29 @@ For direct usage:
 
 For API:
 - TODO
+
+# Questions!
+
+## Part 1
+
+### How did you verify that you are parsing the contours correctly?
+
+TODO
+
+### What changes did you make to the code, if any, in order to integrate it into our production code base?
+
+TODO
+
+## Part 2
+
+### Did you change anything from the pipelines built in Parts 1 to better streamline the pipeline built in Part 2? If so, what? If not, is there anything that you can imagine changing in the future?
+
+TODO
+
+### How do you/did you verify that the pipeline was working correctly?
+
+TODO
+
+### Given the pipeline you have built, can you see any deficiencies that you would change if you had more time? If not, can you think of any improvements/enhancements to the pipeline that you could build in?
+
+TODO 
