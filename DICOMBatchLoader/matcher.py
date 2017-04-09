@@ -1,5 +1,6 @@
 """Reads data in a format such as final_data/ and matches contours to DICOM images"""
 
+import os
 import pandas as pd
 
 def read_linker(filename):
@@ -11,11 +12,17 @@ def read_linker(filename):
 
     return pd.read_csv(filename).values.tolist()
 
-def get_contours(original_id):
+def get_contours(data_dir, original_id):
     """Get a list of filepaths to all contours belonging to an original ID"""
-    pass
+    contour_paths = []
+    path = os.path.join(data_dir, 'contourfiles/' + original_id + '/i-contours')
+    for (dirpath, _, filenames) in os.walk(path):
+        for filename in filenames:
+            contour_paths.append(os.path.join(dirpath, filename))
+        break
+    return contour_paths
 
-def get_dicoms(patient_id):
+def get_dicoms(data_dir, patient_id):
     """Get a list of filepaths to all DICOM images belonging to a patient ID"""
     pass
 
