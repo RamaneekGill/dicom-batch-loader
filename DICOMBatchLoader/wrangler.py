@@ -1,6 +1,8 @@
 """Reads data in a format such as final_data/ and matches contours to DICOM images"""
 
 import os
+import parser
+import numpy as np
 import pandas as pd
 
 def read_linker(filename):
@@ -9,8 +11,10 @@ def read_linker(filename):
     :param filename: filepath to the linker csv to parse
     :return: list of tuples holding Patient ID, Original ID of the data
     """
-
-    return pd.read_csv(filename).values.tolist()
+    csv = pd.read_csv(filename)
+    patient_ids = csv['patient_id'].values.tolist()
+    original_ids = csv['original_id'].values.tolist()
+    return patient_ids, original_ids
 
 def get_contours(data_dir, original_id):
     """Get a list of filepaths to all contours belonging to an original ID"""
@@ -48,7 +52,7 @@ def _get_id_of_dicom(filename):
     # The id is the filename minus the file extension
     return os.path.basename(filename).split('.')[0]
 
-def get_contour_dicom_pairs(contours, dicoms):
+def get_contour_dicom_path_pairs(contours, dicoms):
     """Creates a list of tuples, a contour filepath and dicom filepath for all
     dicoms that have an inner contour file for an Orignal ID and Patient ID pair.
 
@@ -67,4 +71,34 @@ def get_contour_dicom_pairs(contours, dicoms):
                 break
 
     return matches
-    
+
+def wrangle(data_dir, linker_filepath):
+    """Returns parsed tuple of DICOM images and their respective masks
+
+    :param data_dir: path to the directory of data
+    :param linker_filepath: path to the linker CSV file for the data
+    :return: tuple of numpy array of DICOM images and a numpy array of its masks
+    """
+    contour_dicom_path_pairs = []
+    patient_ids, original_ids = read_linker(linker_filepath)
+
+    for i in range(len(patient_ids)):
+        contours = get_contours(data_dir, original_ids[i])
+        dicoms = get_dicoms(data_dir, patient_ids[i])
+        contour_dicom_path_pairs += get_contour_dicom_path_pairs(contours, dicoms)
+
+    dicoms = []
+    masks = []
+    for path_pair in contour_dicom_path_pairs:
+        dicom = parser.parse_dicom_file(path_pair[1])
+        if dicom is None: # Dicom failed to load correctly, skip the pair
+            continue
+
+        contour = parser.parse_contour_file(path_pair[0])
+        mask = parser.poly_to_mask(contour, dicom.shape[1], dicom.shape[0])
+
+        dicoms.append(dicom)
+        masks.append(mask)
+
+
+    return np.array(dicoms), np.array(masks)

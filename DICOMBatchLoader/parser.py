@@ -49,7 +49,7 @@ def parse_dicom_file(filename):
         if not_origin_and_not_horizontal(intercept, slope):
             dcm_image = dcm_image * slope + intercept
 
-        return {'pixel_data' : dcm_image}
+        return dcm_image
 
     except InvalidDicomError:
         return None
