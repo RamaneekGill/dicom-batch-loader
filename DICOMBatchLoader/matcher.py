@@ -24,7 +24,13 @@ def get_contours(data_dir, original_id):
 
 def get_dicoms(data_dir, patient_id):
     """Get a list of filepaths to all DICOM images belonging to a patient ID"""
-    pass
+    dicom_paths = []
+    path = os.path.join(data_dir, 'dicoms/' + patient_id)
+    for (dirpath, _, filenames) in os.walk(path):
+        for filename in filenames:
+            dicom_paths.append(os.path.join(dirpath, filename))
+        break
+    return dicom_paths
 
 def _get_id_of_contour(filename):
     """Returns the ID from the contour file, this is used to match to the corresponding DICOM.
@@ -44,5 +50,3 @@ def get_contour_dicom_pairs(contours, dicoms):
     :return: list of tuples with a matching dicom and inner countour filepaths
     """
     pass
-
-
