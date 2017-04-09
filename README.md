@@ -90,11 +90,18 @@ For API:
 
 ### How did you verify that you are parsing the contours correctly?
 
-TODO
+Due to time considerations I manually visualized the mask and to see if it made sense. I have documented
+how I would go about creating automated unit tests for this sort of thing in the tests file.
 
 ### What changes did you make to the code, if any, in order to integrate it into our production code base?
 
-TODO
+Run `git diff 7dda6d0 7dda6d0^1` to see the changes in one commit.
+
+Notable changes:
+- Removed unneccessary try/except blocks and instead used the library `hasattr()` method to check DICOM image properties.
+- Put a warning in the code stating we assume a polygon is inserted in to the `poly_to_mask()` function
+- Put a warning stating linking to a stackoverflow post for code justification is just a plain bad idea. Instead research the library APIs and explain the code in readable comments
+- Abstract out the awkward if statement into a readable function call `not_origin_and_not_horizontal()`, I may have misunderstood the code intentions but the idea was there :P
 
 ## Part 2
 
