@@ -7,12 +7,21 @@ Batch generator for DICOM and inner contours.
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
 ### Prerequisites
-The following Python packages are used:
-- PIL
-- Pandas
-- Keras
-- pydicom
+We use Python, 3.5 to be precise.
 
+The following Python packages are used and their motivation behind them.
+- pillow
+ - For image boolean mask creation
+- pandas
+ - For reading a CSV and basic data wrangling
+- pydicom
+ - For parsing DICOM images
+- numpy
+ - For use of numpy arrays
+- keras
+ - For reusing the ImageDataGenerator
+
+TODO `pip freeze > requirements.txr` for exact reproduction of the Python environment.
 
 ### Compute Environment
 
