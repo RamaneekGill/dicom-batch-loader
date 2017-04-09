@@ -38,8 +38,15 @@ def _get_id_of_contour(filename):
     :param filename: filepath to a contour file
     :return: string representation of the ID
     """
+    # The id is the 3 section of the filename
+    contour_id = os.path.basename(filename).split('-')[2]
+    # Remove leading zeros from the id
+    return str(int(contour_id))
 
-    print(filename)
+def _get_id_of_dicom(filename):
+    """Gets the id of the dicom file"""
+    # The id is the filename minus the file extension
+    return os.path.basename(filename).split('.')[0]
 
 def get_contour_dicom_pairs(contours, dicoms):
     """Creates a list of tuples, a contour filepath and dicom filepath for all
@@ -49,4 +56,15 @@ def get_contour_dicom_pairs(contours, dicoms):
     :param dicoms: list of dicom filepaths
     :return: list of tuples with a matching dicom and inner countour filepaths
     """
-    pass
+    matches = []
+    for contour in contours:
+        contour_id = _get_id_of_contour(contour)
+        for dicom in dicoms:
+            dicom_id = _get_id_of_dicom(dicom)
+
+            if contour_id == dicom_id:
+                matches.append([contour, dicom])
+                break
+
+    return matches
+    
