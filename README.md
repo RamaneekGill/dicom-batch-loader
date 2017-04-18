@@ -233,24 +233,20 @@ this is usually an effective technique
 
 ### Non Machine Learning Segmentation
 
-Convolutions! Kernels have historic significance in computer vision, especially for edge detection. Sobel filter
-is great for edge detection.
-
-Thresholds with image gradients actually may work very well since most inner contours are a clear distinction 
-from the outer contour boundaries based on the pixel intensities changing quickly. A convolution
+Convolutions! Kernels have historic significance in computer vision, especially for edge detection. Sobel filter is a great example.
 
 From the sample data in this exercise it seems like the problem is almost an edge detection challenge when
-given an outer contour. Don't believe me? Just view the images in https://github.com/RamaneekGill/dicom-batch-loader/blob/master/visualized
+given an outer contour. View the images in https://github.com/RamaneekGill/dicom-batch-loader/blob/master/visualized to get a sense of the data.
 
-I wouldn't go all out edge detection with an algorithm like canny edges since it seems like you'd have to constantly
-tweak parameters and can pick up small artifacts.
+Thresholds with image gradients may work suprisingly well since most inner contours are a clear distinction from the outer contour boundaries based on the pixel intensities changing quickly. A convolution with a Sobel filter to compute the gradient magnitude can be a quick test. OpenCV is good for this I believe.
 
-First I would smooth them image, light gaussian smoothenning I've found works well in the past. Then use a watershed
-algorithm to perform segmentation. Why watershed? Works on greyscale, seperates 'basins' seems almost like what
-the task is at hand. I've found watershed to have problems with noisy images which seem like our case so tuning the
-image smoothening would be key.
+I wouldn't go all out edge detection with an algorithm like canny edges since it seems like you'd have to constantly tweak parameters and can pick up small artifacts.
 
-Having strict thresholds such as only one blob is allowed (the inner contour) and a minimum area size may help.
+First I would smooth them image, light gaussian smoothenning I've found works well in the past. Then use a watershed algorithm to perform segmentation. 
+
+Why watershed? Works on greyscale, seperates 'basins' seems almost like what the task is at hand. I've found watershed to have problems with noisy images so tuning the image smoothening would be key.
+
+Having strict thresholds such as only one blob is allowed (the inner contour) and a minimum area size may help. Domain logic plays a role here as well.
 
 ### Machine Learning Approach
 - Fix generator issue in the Notes section
