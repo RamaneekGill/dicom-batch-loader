@@ -38,4 +38,4 @@ def visualize(dicom, i_contour, o_contour, meta, show=False):
     visualization.convert('L').save(directory + '/' + filename, format='jpeg')
 
     if show:
-        visualization.show()
+        visualization.show(title=filename)
