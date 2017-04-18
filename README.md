@@ -170,6 +170,58 @@ Changes to note:
 - The `wrangle()` method on the `Wrangler` module was augmented to return meta data as well as original contour vertice lists of inner and outer contours for visualization purposes. This method has potential to be parallelized easily due to loading multiple types of files at once all independently of one another.
 - The `Wrangler` module would work better as a class due to its dependence on the `data_dir` parameter in many methods. TODO
 
+## Part 4 Segmentation Approaches
+
+### Can thresholding work?
+
+Before diving into this question lets do a visualiztion. Go to the `DICOMBatchLoader/visualized` folder. Select all files, right click and click open. Now you can easily use arrow keys to animate a patient's images to view the outer and inner contours.
+
+Note: The visualization is in order of original dicom, inner contour, outer contour. The contours are circled by a thing solid black line. TODO make this colored.
+
+An overall trend one can visually inspect is that it is relatively easy to determine an inner contour if given an outer contour. The inner contour is the whiter smaller circle within the outer contour.
+
+Some assumptions can be made here:
+- The inner contour is always present
+- The inner contour is always inside the outer contour
+- Outer and inner contours are always circular in shape
+
+Some considerations:
+- We assume the data is annotated and always correct.
+- Take a look at the image ![Image of incorrect outer circle](https://github.com/RamaneekGill/dicom-batch-loader/blob/master/visualized/dicom_inner_outer_SC-HF-I-6_SCD0000501_199.jpeg)
+ - The outer circle seems like it is in the incorrect place but the inner circle seems correct. This could be an issue with the data or the visualization code. I'm going to put my bets on my code and say it is a problem with data since all other visualizations for a __different patient insteand of SCD0000501__ seem correct.
+ - This is affecting all outer contours for patient `SCD0000501`
+- The image ![not round inner contour](https://github.com/RamaneekGill/dicom-batch-loader/blob/master/visualized/dicom_inner_outer_SC-HF-I-2_SCD0000201_220.jpeg) does not have a round contour.
+
+So can we create a simple thresholding algorithm that can _acurrately_ classify inner contours given an outer contour and the original image? I'm going to say yes but only to a certain extent. If the assumptions listed above can be made then the images that fit those assumptions can have a thresholding value on the intensity of the picture to label an circular-esque area of the inner contour.
+
+Some great examples (from different patients are below)
+
+![contour1](https://github.com/RamaneekGill/dicom-batch-loader/blob/master/visualized/dicom_inner_outer_SC-HF-I-2_SCD0000201_140.jpeg)
+
+![contour2](https://github.com/RamaneekGill/dicom-batch-loader/blob/master/visualized/dicom_inner_outer_SC-HF-I-1_SCD0000101_159.jpeg)
+
+![contour3](https://github.com/RamaneekGill/dicom-batch-loader/blob/master/visualized/dicom_inner_outer_SC-HF-I-5_SCD0000401_100.jpeg)
+
+### Justification
+
+I don't have any concrete statistic to support my assumption. Here is what I would do to confirm my hypothesis of a simple thresholding algorithm based on pixel intensities within an outer contour:
+- Assume the following:
+ - The inner contour is always present
+ - The inner contour is always inside the outer contour
+ - Outer and inner contours are always circular in shape
+- Isolate inner contour pixels and outer contour pixels
+- Create a histogram of pixel intensities for exclusive outer contour pixels and exclusive inner contour pixels
+- Perform a comparison of two means (http://www.stat.yale.edu/Courses/1997-98/101/meancomp.htm) to determine confidence given the dataset to determine an appropriate threshold and whether a threshold can actually be determined to a sufficient confidence
+
+TODO: get pixels only in outer contour not in inner contour, histogram them, visualize them
+
+Histograms will give an overall picture of how pixel intensity distributions look like within an image. If given a mask
+this is usually an effective technique
+- https://arxiv.org/abs/1609.00096
+- https://arxiv.org/abs/1703.04301 (uses ML but isn't fully supervised which may be the point of this)
+- https://arxiv.org/abs/1302.1296
+- A previous course I took http://www.cs.toronto.edu/~guerzhoy/320/lec/edgedetection.pdf
+ - I did research with this professor in the past
 
 # NOTES:
 
