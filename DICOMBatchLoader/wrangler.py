@@ -16,10 +16,25 @@ def read_linker(filename):
     original_ids = csv['original_id'].values.tolist()
     return patient_ids, original_ids
 
-def get_contours(data_dir, original_id):
+def get_i_contours(data_dir, original_id):
+    """Get a list of filepaths to all inner contours belonging to an original ID"""
+    return _get_contours(data_dir, original_id, 'inner')
+
+def get_o_contours(data_dir, original_id):
+    """Get a list of filepaths to all outer contours belonging to an original ID"""
+    return _get_contours(data_dir, original_id, 'outer')
+
+def _get_contours(data_dir, original_id, contour_type):
     """Get a list of filepaths to all contours belonging to an original ID"""
+    if contour_type == 'i' or contour_type == 'inner':
+        contour_folder = 'i-contours'
+    elif contour_type == 'o' or contour_type == 'outer':
+        contour_folder = 'o-contours'
+    else:
+        raise ValueError('Only inner or outer contours are supported.')
+
     contour_paths = []
-    path = os.path.join(data_dir, 'contourfiles/' + original_id + '/i-contours')
+    path = os.path.join(data_dir, 'contourfiles/' + original_id + '/' + contour_folder)
     for (dirpath, _, filenames) in os.walk(path):
         for filename in filenames:
             contour_paths.append(os.path.join(dirpath, filename))
@@ -52,53 +67,76 @@ def _get_id_of_dicom(filename):
     # The id is the filename minus the file extension
     return os.path.basename(filename).split('.')[0]
 
-def get_contour_dicom_path_pairs(contours, dicoms):
-    """Creates a list of tuples, a contour filepath and dicom filepath for all
-    dicoms that have an inner contour file for an Orignal ID and Patient ID pair.
+def get_contour_dicom_path_pairs(i_contours, o_contours, dicoms):
+    """Creates a list of lists, an inner contour filepath, outer contour filepath
+    and dicom filepath. All inner lists have a matching Orignal ID and Patient ID pair.
 
-    :param contours: list of contour filepaths
+    :param i_contours: list of inner contour filepaths
+    :param o_contours: list of outer contour filepaths
     :param dicoms: list of dicom filepaths
     :return: list of tuples with a matching dicom and inner countour filepaths
     """
     matches = []
-    for contour in contours:
-        contour_id = _get_id_of_contour(contour)
-        for dicom in dicoms:
-            dicom_id = _get_id_of_dicom(dicom)
+    for i_contour in i_contours:
+        i_contour_id = _get_id_of_contour(i_contour)
+        for o_contour in o_contours:
+            o_contour_id = _get_id_of_contour(o_contour)
 
-            if contour_id == dicom_id:
-                matches.append([contour, dicom])
+            if i_contour_id == o_contour_id:
+                for dicom in dicoms:
+                    dicom_id = _get_id_of_dicom(dicom)
+
+                    if i_contour_id == dicom_id:
+                        matches.append({
+                            'inner_contour': i_contour,
+                            'outer_contour': o_contour,
+                            'dicom': dicom})
+                        break
                 break
 
     return matches
 
 def wrangle(data_dir, linker_filepath):
-    """Returns parsed tuple of DICOM images and their respective masks
+    """Returns parsed dictionary of DICOM images and their respective inner
+     and outer masks in an numpy array.
 
     :param data_dir: path to the directory of data
     :param linker_filepath: path to the linker CSV file for the data
-    :return: tuple of numpy array of DICOM images and a numpy array of its masks
+    :return: dictionary of numpy arrays containing DICOMs, inner contour, outer contour,
+    inner masks, outer masks, and list of file paths used for lookup table uses
     """
     contour_dicom_path_pairs = []
     patient_ids, original_ids = read_linker(linker_filepath)
 
     for i in range(len(patient_ids)):
-        contours = get_contours(data_dir, original_ids[i])
+        i_contours = get_i_contours(data_dir, original_ids[i])
+        o_contours = get_o_contours(data_dir, original_ids[i])
         dicoms = get_dicoms(data_dir, patient_ids[i])
-        contour_dicom_path_pairs += get_contour_dicom_path_pairs(contours, dicoms)
+        contour_dicom_path_pairs += get_contour_dicom_path_pairs(i_contours, o_contours, dicoms)
 
     dicoms = []
-    masks = []
+    i_masks = []
+    o_masks = []
     for path_pair in contour_dicom_path_pairs:
-        dicom = parser.parse_dicom_file(path_pair[1])
+        dicom = parser.parse_dicom_file(path_pair['dicom'])
         if dicom is None: # Dicom failed to load correctly, skip the pair
             continue
 
-        contour = parser.parse_contour_file(path_pair[0])
-        mask = parser.poly_to_mask(contour, dicom.shape[1], dicom.shape[0])
+        i_contour = parser.parse_contour_file(path_pair['inner_contour'])
+        o_contour = parser.parse_contour_file(path_pair['outer_contour'])
+
+        i_mask = parser.poly_to_mask(i_contour, dicom.shape[1], dicom.shape[0])
+        o_mask = parser.poly_to_mask(o_contour, dicom.shape[1], dicom.shape[0])
 
         dicoms.append(dicom)
-        masks.append(mask)
+        i_masks.append(i_mask)
+        o_masks.append(o_mask)
 
-
-    return np.array(dicoms), np.array(masks)
+    return {
+        'dicoms': np.array(dicoms),
+        'inner_contours': i_contour,
+        'outer_contours': o_contour,
+        'inner_contour_masks': np.array(i_masks),
+        'outer_contour_masks': np.array(o_masks),
+        'paths': contour_dicom_path_pairs
+    }
