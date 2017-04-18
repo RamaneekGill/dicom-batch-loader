@@ -29,7 +29,7 @@ def parse_dicom_file(filename):
     """Parse the given DICOM filename
 
     :param filename: filepath to the DICOM file to parse
-    :return: dictionary with DICOM image data
+    :return: DICOM image data
     """
 
     try:
@@ -79,3 +79,18 @@ def poly_to_mask(polygon, width, height):
     # Convert the image to a boolean numpy array, most likely for easy Keras use
     mask = np.array(img).astype(bool)
     return mask
+
+def draw_outline(background, outline):
+    """Draw polygon outline on an image
+
+    :param background: numpy array representation of an image
+    :param outline: list of pairs of x, y coords [(x1, y1), (x2, y2), ...]
+     in units of pixels
+    :return: Image from PIL with auto inferred mode and same shape as background
+    """
+    back = Image.fromarray(background)
+    poly = Image.new('RGBA', (background.shape[1], background.shape[0]))
+    pdraw = ImageDraw.Draw(poly)
+    pdraw.polygon(outline, fill=None, outline=(0, 0, 0, 255))
+    back.paste(poly, mask=poly)
+    return back
