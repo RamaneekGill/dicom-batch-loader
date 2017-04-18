@@ -244,6 +244,18 @@ image smoothening would be key.
 
 Having strict thresholds such as only one blob is allowed (the inner contour) and a minimum area size may help.
 
+### Machine Learning Approach
+- Fix generator issue in the Notes section
+- Generate more images using Keras
+ - Gives us more data to work with
+- Take all pixels in inner contour, label as inner contour
+- Take all pixels in outer contour that are NOT in inner contour, label as outer contour
+- Becomes a classification problem
+- Split data in to train and validation sets
+    - Stratified k fold cross validation to maintain distributions between folds
+- Test with simple logistic regression for AUC accuracy for baseline
+- Test with CNN since convolutions are generally best when dealing with images
+- Optimize parameters using a bayesian approach
 
 # NOTES:
 
