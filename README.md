@@ -223,6 +223,28 @@ this is usually an effective technique
 - A previous course I took http://www.cs.toronto.edu/~guerzhoy/320/lec/edgedetection.pdf
  - I did research with this professor in the past
 
+### Non Machine Learning Segmentation
+
+Convolutions! Kernels have historic significance in computer vision, especially for edge detection. Sobel filter
+is great for edge detection.
+
+Thresholds with image gradients actually may work very well since most inner contours are a clear distinction 
+from the outer contour boundaries based on the pixel intensities changing quickly. A convolution
+
+From the sample data in this exercise it seems like the problem is almost an edge detection challenge when
+given an outer contour. Don't believe me? Just view the images in https://github.com/RamaneekGill/dicom-batch-loader/blob/master/visualized
+
+I wouldn't go all out edge detection with an algorithm like canny edges since it seems like you'd have to constantly
+tweak parameters and can pick up small artifacts.
+
+First I would smooth them image, light gaussian smoothenning I've found works well in the past. Then use a watershed
+algorithm to perform segmentation. Why watershed? Works on greyscale, seperates 'basins' seems almost like what
+the task is at hand. I've found watershed to have problems with noisy images which seem like our case so tuning the
+image smoothening would be key.
+
+Having strict thresholds such as only one blob is allowed (the inner contour) and a minimum area size may help.
+
+
 # NOTES:
 
 Error when creating generator:
@@ -230,3 +252,5 @@ Error when creating generator:
 
 This is because the channels axis should have value 1 as per Keras documentation. Going to stay true to the time
 and submit regardless.
+
+Most time has been spent on research and understanding the problem, some docstrings may be out of date.
