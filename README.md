@@ -265,4 +265,8 @@ Error when creating generator:
 This is because the channels axis should have value 1 as per Keras documentation. Going to stay true to the time
 and submit regardless.
 
+Added the method `draw_outline()` to the `Parser` module
+
+Updated How To Use section to do visualizations.
+
 Most time has been spent on research and understanding the problem, some docstrings may be out of date.
