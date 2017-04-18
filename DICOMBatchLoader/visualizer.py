@@ -22,7 +22,7 @@ def visualize(dicom, i_contour, o_contour, meta, show=False):
     o_dicom_im = parser.draw_outline(dicom, o_contour)
 
     directory = 'visualized'
-    filename = 'dicom_inner_outer_' + meta['original_id'] + '_' + meta['patient_id'] + '_' + meta['image_id']
+    filename = 'dicom_inner_outer_' + meta['original_id'] + '_' + meta['patient_id'] + '_' + meta['image_id'] + '.jpeg'
 
     # Create a canvas that is 3 images wide
     canvas_size = (i_dicom_im.size[0] * 3, i_dicom_im.size[1])
