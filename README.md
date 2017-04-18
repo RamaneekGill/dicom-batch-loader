@@ -159,6 +159,16 @@ This pipeline needs more tests!!!
 Also this pipeline should ideally be deployed as a microservice and not embedded. You can do some pretty cool things with apache spark and
 simultaneously training a variety of different models.
 
+## Part 3 Parsing Outer Contours
+
+### Changes Made
+
+Minimal changes were made to `wrangler.py`. Due to adequate code design in the previous phase.
+Changes to note:
+- Use a decorate pattern to parse inner OR outer contours with the same code. `get_i_contours()` and `get_o_contours()` call the private method `_get_contours()` since both inner and outer contour file paths have the same structure they can also reuse the `_get_contour_id()` private method as well.
+- Needed to make changes to the matcher for inner contours and dicom images to fetch the right image id. This required another check with having a loop for finding the matching outer contour file. This is inefficient but the O(n^3) loop can be reduced to O(3) by using dictionaries to fetch a file path based on `patient_id`, and `image_id`
+- The `wrangle()` method on the `Wrangler` module was augmented to return meta data as well as original contour vertice lists of inner and outer contours for visualization purposes. This method has potential to be parallelized easily due to loading multiple types of files at once all independently of one another.
+- The `Wrangler` module would work better as a class due to its dependence on the `data_dir` parameter in many methods. TODO
 
 
 # NOTES:
