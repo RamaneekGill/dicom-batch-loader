@@ -82,12 +82,16 @@ For direct usage:
 ```
 import wrangler
 import generator
+import visualizer
 
 data_dir = '.../final_data/'
-dicoms, masks = wrangler.wrangle(data_dir, data_dir + 'link.csv')
+data = wrangler.wrangle(data_dir, data_dir + 'link.csv')
+
+visualizer.visualize(data['dicoms'][0], data['inner_contours'][0], 
+                     data['outer_contours'][0], data['meta'][0], show=True)
 
 factory = generator.GeneratorFactory()
-dicom_mask_batch_generator = factory.create(dicoms, masks)
+dicom_mask_batch_generator = factory.create(data['dicoms'], data['inner_contour_masks'])
 your_keras_model.fit_generator(dicom_mask_batch_generator, steps_per_epoch=10, epochs=3)
 ```
 
