@@ -69,12 +69,13 @@ def _get_id_of_dicom(filename):
 
 def get_contour_dicom_path_pairs(i_contours, o_contours, dicoms):
     """Creates a list of lists, an inner contour filepath, outer contour filepath
-    and dicom filepath. All inner lists have a matching Orignal ID and Patient ID pair.
+    and dicom filepath along with IDs. All inner lists have a matching Original ID and Patient ID pair.
 
     :param i_contours: list of inner contour filepaths
     :param o_contours: list of outer contour filepaths
     :param dicoms: list of dicom filepaths
-    :return: list of tuples with a matching dicom and inner countour filepaths
+    :return: list of dictionaries containing a matching dicom, inner countour, outer contour filepaths
+    and patient id, image id, and original id
     """
     matches = []
     for i_contour in i_contours:
@@ -90,7 +91,11 @@ def get_contour_dicom_path_pairs(i_contours, o_contours, dicoms):
                         matches.append({
                             'inner_contour': i_contour,
                             'outer_contour': o_contour,
-                            'dicom': dicom})
+                            'dicom': dicom,
+                            'patient_id': os.path.basename(os.path.dirname(dicom)),
+                            'image_id': dicom_id,
+                            'original_id': os.path.basename(os.path.dirname(
+                                os.path.dirname(i_contour)))})
                         break
                 break
 
@@ -115,6 +120,8 @@ def wrangle(data_dir, linker_filepath):
         contour_dicom_path_pairs += get_contour_dicom_path_pairs(i_contours, o_contours, dicoms)
 
     dicoms = []
+    i_contours = []
+    o_contours = []
     i_masks = []
     o_masks = []
     for path_pair in contour_dicom_path_pairs:
@@ -131,12 +138,14 @@ def wrangle(data_dir, linker_filepath):
         dicoms.append(dicom)
         i_masks.append(i_mask)
         o_masks.append(o_mask)
+        i_contours.append(i_contour)
+        o_contours.append(o_contour)
 
     return {
         'dicoms': np.array(dicoms),
-        'inner_contours': i_contour,
-        'outer_contours': o_contour,
+        'inner_contours': np.array(i_contours),
+        'outer_contours': np.array(o_contours),
         'inner_contour_masks': np.array(i_masks),
         'outer_contour_masks': np.array(o_masks),
-        'paths': contour_dicom_path_pairs
+        'meta': contour_dicom_path_pairs
     }
