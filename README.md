@@ -180,19 +180,25 @@ Note: The visualization is in order of original dicom, inner contour, outer cont
 
 An overall trend one can visually inspect is that it is relatively easy to determine an inner contour if given an outer contour. The inner contour is the whiter smaller circle within the outer contour.
 
-Some assumptions can be made here:
+#### Some assumptions can be made here:
 - The inner contour is always present
 - The inner contour is always inside the outer contour
 - Outer and inner contours are always circular in shape
 
-Some considerations:
+#### Some considerations:
 - We assume the data is annotated and always correct.
 - Take a look at the image ![Image of incorrect outer circle](https://github.com/RamaneekGill/dicom-batch-loader/blob/master/visualized/dicom_inner_outer_SC-HF-I-6_SCD0000501_199.jpeg)
  - The outer circle seems like it is in the incorrect place but the inner circle seems correct. This could be an issue with the data or the visualization code. I'm going to put my bets on my code and say it is a problem with data since all other visualizations for a __different patient insteand of SCD0000501__ seem correct.
  - This is affecting all outer contours for patient `SCD0000501`
-- The image ![not round inner contour](https://github.com/RamaneekGill/dicom-batch-loader/blob/master/visualized/dicom_inner_outer_SC-HF-I-2_SCD0000201_220.jpeg) does not have a round contour.
+- The image ![not round inner contour](https://github.com/RamaneekGill/dicom-batch-loader/blob/master/visualized/dicom_inner_outer_SC-HF-I-2_SCD0000201_220.jpeg) does not have a round inner contour.
 
-So can we create a simple thresholding algorithm that can _acurrately_ classify inner contours given an outer contour and the original image? I'm going to say yes but only to a certain extent. If the assumptions listed above can be made then the images that fit those assumptions can have a thresholding value on the intensity of the picture to label an circular-esque area of the inner contour.
+#### Accurate thresholding?
+
+So can we create a simple thresholding algorithm that can __accurrately__ classify inner contours given an outer contour and the original image? 
+
+I'm going to say yes but only to a certain extent. If the assumptions listed above can be made then the images that fit those assumptions can have a thresholding value on the intensity of the picture to label an circular-esque area of the inner contour.
+
+#### Examples of good contours
 
 Some great examples (from different patients are below)
 
@@ -211,7 +217,8 @@ I don't have any concrete statistic to support my assumption. Here is what I wou
  - Outer and inner contours are always circular in shape
 - Isolate inner contour pixels and outer contour pixels
 - Create a histogram of pixel intensities for exclusive outer contour pixels and exclusive inner contour pixels
-- Perform a comparison of two means (http://www.stat.yale.edu/Courses/1997-98/101/meancomp.htm) to determine confidence given the dataset to determine an appropriate threshold and whether a threshold can actually be determined to a sufficient confidence
+- Perform a comparison of two means (http://www.stat.yale.edu/Courses/1997-98/101/meancomp.htm) 
+ - Given the dataset determine an appropriate threshold and whether tge threshold has a sufficient confidence on the data
 
 TODO: get pixels only in outer contour not in inner contour, histogram them, visualize them
 
