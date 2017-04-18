@@ -11,15 +11,15 @@ We use Python, 3.5 to be precise.
 
 The following Python packages are used and their motivation behind them.
 - pillow
- - For image boolean mask creation
+  - For image boolean mask creation
 - pandas
- - For reading a CSV and basic data wrangling
+  - For reading a CSV and basic data wrangling
 - pydicom
- - For parsing DICOM images
+  - For parsing DICOM images
 - numpy
- - For use of numpy arrays
+  - For use of numpy arrays
 - keras
- - For reusing the ImageDataGenerator
+  - For reusing the ImageDataGenerator
 
 TODO `pip freeze > requirements.txt` for exact reproduction of the Python environment.
 
@@ -188,8 +188,8 @@ An overall trend one can visually inspect is that it is relatively easy to deter
 #### Some considerations:
 - We assume the data is annotated and always correct.
 - Take a look at the image ![Image of incorrect outer circle](https://github.com/RamaneekGill/dicom-batch-loader/blob/master/visualized/dicom_inner_outer_SC-HF-I-6_SCD0000501_199.jpeg)
- - The outer circle seems like it is in the incorrect place but the inner circle seems correct. This could be an issue with the data or the visualization code. I'm going to put my bets on my code and say it is a problem with data since all other visualizations for a __different patient insteand of SCD0000501__ seem correct.
- - This is affecting all outer contours for patient `SCD0000501`
+  - The outer circle seems like it is in the incorrect place but the inner circle seems correct. This could be an issue with the data or the visualization code. I'm going to put my bets on my code and say it is a problem with data since all other visualizations for a __different patient insteand of SCD0000501__ seem correct.
+  - This is affecting all outer contours for patient `SCD0000501`
 - The image ![not round inner contour](https://github.com/RamaneekGill/dicom-batch-loader/blob/master/visualized/dicom_inner_outer_SC-HF-I-2_SCD0000201_220.jpeg) does not have a round inner contour.
 
 #### Accurate thresholding?
@@ -212,13 +212,14 @@ Some great examples (from different patients are below)
 
 I don't have any concrete statistic to support my assumption. Here is what I would do to confirm my hypothesis of a simple thresholding algorithm based on pixel intensities within an outer contour:
 - Assume the following:
- - The inner contour is always present
- - The inner contour is always inside the outer contour
- - Outer and inner contours are always circular in shape
+  - The inner contour is always present
+  - The inner contour is always inside the outer contour
+  - Outer and inner contours are always circular in shape
+
 - Isolate inner contour pixels and outer contour pixels
 - Create a histogram of pixel intensities for exclusive outer contour pixels and exclusive inner contour pixels
 - Perform a comparison of two means (http://www.stat.yale.edu/Courses/1997-98/101/meancomp.htm) 
- - Given the dataset determine an appropriate threshold and whether tge threshold has a sufficient confidence on the data
+  - Given the dataset determine an appropriate threshold and whether tge threshold has a sufficient confidence on the data
 
 TODO: get pixels only in outer contour not in inner contour, histogram them, visualize them
 
@@ -228,7 +229,7 @@ this is usually an effective technique
 - https://arxiv.org/abs/1703.04301 (uses ML but isn't fully supervised which may be the point of this)
 - https://arxiv.org/abs/1302.1296
 - A previous course I took http://www.cs.toronto.edu/~guerzhoy/320/lec/edgedetection.pdf
- - I did research with this professor in the past
+  - I did research with this professor in the past
 
 ### Non Machine Learning Segmentation
 
